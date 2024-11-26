@@ -5,7 +5,9 @@ const Nav = () => {
   const [visible, setVisible] = useState(false);
   return (
     <div className="flex items-center justify-between py-8 ont-medium">
-      <img src={Assets.logo} alt="logo" className="w-36" />
+      <Link to="/">
+        <img src={Assets.logo} alt="logo" className="w-36" />
+      </Link>
 
       <ul className="hidden sm:flex gap-5 text-base text-gray-800 ">
         <NavLink
