@@ -4,7 +4,7 @@ import { Link, Links, NavLink } from "react-router-dom";
 import { ShopContext } from "../context/ShopContext";
 const Nav = () => {
   const [visible, setVisible] = useState(false);
-  const { setShowSearch } = useContext(ShopContext);
+  const { setShowSearch, getToatal } = useContext(ShopContext);
   return (
     <div className="flex items-center justify-between py-8 ont-medium">
       <Link to="/">
@@ -69,7 +69,7 @@ const Nav = () => {
             className="w-5 min-w-5 cursor-pointer"
           />
           <p className="absolute right-[-5px] bottom-[-5px] text-center w-4 leading-4 bg-black text-white text-[10px] aspect-square rounded-full">
-            10
+            {getToatal()}
           </p>
         </Link>
         <img
