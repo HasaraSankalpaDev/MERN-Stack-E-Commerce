@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from "react";
-import { Products } from "../assets/assets";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
 
 export const ShopContext = createContext();
 
@@ -9,16 +9,32 @@ const ShopContextProvider = ({ children }) => {
   const currency = "$";
   const delivery_fee = 10;
 
+  const [Products, setProducts] = useState([]); // fetched from backend
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const navigate = useNavigate();
 
+  // Fetch products from backend API
+  const fetchProducts = async () => {
+    try {
+      const res = await axios.get("http://localhost:5000/api/products"); // replace with your API
+      setProducts(res.data);
+    } catch (err) {
+      console.log("Error fetching products:", err);
+      toast.error("Failed to fetch products");
+    }
+  };
+
+  useEffect(() => {
+    fetchProducts();
+  }, []);
+
   const addToCart = (itemId, size, price) => {
-    if (
-      !size &&
-      Products.find((item) => item._id === itemId)?.sizes?.length > 0
-    ) {
+    const itemInfo = Products.find((item) => item._id === itemId);
+    if (!itemInfo) return;
+
+    if (!size && itemInfo.sizes?.length > 0) {
       toast.error("Select Item Size");
       return;
     }
@@ -57,16 +73,12 @@ const ShopContextProvider = ({ children }) => {
       if (itemInfo) {
         for (const size in cartItems[itemId]) {
           if (cartItems[itemId][size] > 0) {
-            // Handle both priceObj and price formats
             let price = 0;
-            if (itemInfo.priceObj && itemInfo.priceObj[size]) {
-              price = itemInfo.priceObj[size];
-            } else if (itemInfo.price && typeof itemInfo.price === "number") {
+            if (itemInfo.price && typeof itemInfo.price === "number") {
               price = itemInfo.price;
             } else if (itemInfo.price && itemInfo.price[size]) {
               price = itemInfo.price[size];
             }
-
             total += price * cartItems[itemId][size];
           }
         }
@@ -102,10 +114,11 @@ const ShopContextProvider = ({ children }) => {
         setShowSearch,
         cartItems,
         addToCart,
-        getTotal: getTotalCartItems, // Returns total number of items in cart
-        getCartAmount, // Returns total monetary amount
+        getTotal: getTotalCartItems,
+        getCartAmount,
         updateQuantity,
         navigate,
+        fetchProducts, // expose fetchProducts in case you want to refresh products
       }}
     >
       {children}
