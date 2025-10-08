@@ -1,37 +1,78 @@
-import React, { useContext, useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import { Assets } from "../assets/assets";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
+
 const Collection = () => {
   const { Products, search, showSearch } = useContext(ShopContext);
-  const [filter, setFilter] = useState(true);
+  const [filterOpen, setFilterOpen] = useState(false);
   const [filterProducts, setFilterProducts] = useState([]);
   const [category, setCategory] = useState([]);
   const [subCategory, setSubCategory] = useState([]);
   const [sortType, setSortType] = useState("relavent");
 
-  // Category Logic
+  // Sri Lankan inspired categories and subcategories
+  const categories = [
+    "Men",
+    "Women",
+    "Kids",
+    "Trend",
+    "Gifts",
+    "T-Shirts",
+    "Shoes",
+    "Bags",
+    "Traditional",
+    "Casual",
+    "Accessories",
+  ];
+
+  const subCategories = {
+    Men: ["Shirts", "Trousers", "Sarongs", "Office Wear", "Casual Wear"],
+    Women: ["Dresses", "Blouses", "Sarees", "Salwar Kameez", "Casual Wear"],
+    Kids: ["Boys", "Girls", "Infants", "School Uniforms"],
+    Traditional: ["Sarees", "Sarongs", "Osariya", "National Dress"],
+    Shoes: ["Leather Shoes", "Sandals", "Slippers", "Sports Shoes"],
+    Bags: ["Handbags", "Backpacks", "Laptop Bags", "Traditional Bags"],
+    "T-Shirts": ["Polo T-Shirts", "Round Neck", "V-Neck", "Graphic Tees"],
+    Gifts: ["Birthday", "Anniversary", "Festival", "Corporate"],
+    Accessories: [
+      "Jewellery",
+      "Watches",
+      "Belts",
+      "Hats",
+      "Traditional Jewellery",
+    ],
+  };
+
   const toggleCategory = (e) => {
-    if (category.includes(e.target.value)) {
-      setCategory((prev) => prev.filter((item) => item !== e.target.value));
-    } else {
-      setCategory((prev) => [...prev, e.target.value]);
-    }
+    const value = e.target.value;
+    setCategory((prev) =>
+      prev.includes(value) ? prev.filter((c) => c !== value) : [...prev, value]
+    );
   };
 
-  // Sub Category Logic
   const toggleSubCategory = (e) => {
-    if (subCategory.includes(e.target.value)) {
-      setSubCategory((prev) => prev.filter((item) => item !== e.target.value));
-    } else {
-      setSubCategory((prev) => [...prev, e.target.value]);
-    }
+    const value = e.target.value;
+    setSubCategory((prev) =>
+      prev.includes(value) ? prev.filter((s) => s !== value) : [...prev, value]
+    );
   };
 
-  // Filter Logic
+  // Helper function to get product price
+  const getProductPrice = (product) => {
+    if (product.priceObj && typeof product.priceObj === "object") {
+      // Get the first available price from priceObj
+      const prices = Object.values(product.priceObj).filter(
+        (price) => typeof price === "number"
+      );
+      return prices.length > 0 ? prices[0] : 0;
+    }
+    return product.price || 0;
+  };
+
   const applyFilter = () => {
-    let productsCopy = Products.slice();
+    let productsCopy = [...Products]; // Use spread operator instead of slice()
 
     if (search && showSearch) {
       productsCopy = productsCopy.filter((item) =>
@@ -54,159 +95,321 @@ const Collection = () => {
     setFilterProducts(productsCopy);
   };
 
-  // Product Sort Logic
-  const sortProducts = (field) => {
-    let fpCopy = filterProducts.slice();
+  const sortProducts = () => {
+    let fpCopy = [...filterProducts];
 
     switch (sortType) {
       case "low-high":
-        setFilterProducts(fpCopy.sort((a, b) => a.price - b.price));
+        fpCopy.sort((a, b) => {
+          const priceA = getProductPrice(a);
+          const priceB = getProductPrice(b);
+          return priceA - priceB;
+        });
         break;
       case "high-low":
-        setFilterProducts(fpCopy.sort((a, b) => b.price - a.price));
+        fpCopy.sort((a, b) => {
+          const priceA = getProductPrice(a);
+          const priceB = getProductPrice(b);
+          return priceB - priceA;
+        });
+        break;
+      case "newest":
+        // Assuming products have a date field, sort by newest first
+        fpCopy.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         break;
       default:
-        applyFilter();
+        // For "relavent", maintain the original order
         break;
     }
+
+    setFilterProducts(fpCopy);
   };
 
+  const clearAllFilters = () => {
+    setCategory([]);
+    setSubCategory([]);
+    setSortType("relavent");
+  };
+
+  // Apply filters when category, subCategory, search changes
   useEffect(() => {
     applyFilter();
-  }, [category, subCategory, search, showSearch]);
+  }, [category, subCategory, search, showSearch, Products]);
 
+  // Sort products when sortType changes
   useEffect(() => {
-    sortProducts();
+    if (filterProducts.length > 0) {
+      sortProducts();
+    }
   }, [sortType]);
 
+  // Initialize with all products
+  useEffect(() => {
+    setFilterProducts(Products);
+  }, [Products]);
+
   return (
-    <div className="flex flex-col sm:flex-row pt-10 gap-1 sm:gap-10 border-t">
-      {/* Filter Section */}
-      <div className="min-w-60">
-        <p
-          onClick={() => setFilter(!filter)}
-          className="my-2 flex items-center text-xl cursor-pointer gap-2"
-        >
-          FILTERS
-        </p>
-        <img
-          src={Assets.dropdown_icon}
-          alt="dropdown_icon"
-          className={`h-3 sm:hidden ${filter ? "rotate-90" : ""}`}
-        />
-        {/* Category Filter */}
-        <div
-          className={`border border-gray-400 pl-5 py-3 mt-6 ${
-            filter ? "" : "hidden "
-          } sm:block`}
-        >
-          <p className="mb-3 text-sm font-medium">CATEGORIES</p>
-          <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Men`}
-                onChange={toggleCategory}
-              />
-              Men
-            </p>
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Women`}
-                onChange={toggleCategory}
-              />
-              Women
-            </p>
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Kids`}
-                onChange={toggleCategory}
-              />
-              Kids
-            </p>
-          </div>
-        </div>
-
-        {/* Sub Category */}
-        <div
-          className={`border border-gray-400 pl-5 py-3 my-6 ${
-            filter ? "" : "hidden "
-          } sm:block`}
-        >
-          <p className="mb-3 text-sm font-medium">TYPE</p>
-          <div className="flex flex-col gap-2 text-sm font-light text-gray-700">
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Topwear`}
-                onChange={toggleSubCategory}
-              />
-              Topwear
-            </p>
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Bottomwear`}
-                onChange={toggleSubCategory}
-              />
-              Bottomwear
-            </p>
-            <p className="flex gap-2">
-              {" "}
-              <input
-                type="checkbox"
-                className="w-4"
-                value={`Winterwear`}
-                onChange={toggleSubCategory}
-              />
-              Winterwear
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Right Side */}
-      <div className="flex-1">
-        <div className="flex justify-between text-sm sm:text-2xl  mb-4">
-          <Title text1={"ALL"} text2={"COLLECTIONS"} />
-          {/* Product Sort */}
-          <select
-            className="border-2 border-gray-500 text-sm py-2 px-2"
-            onChange={(e) => setSortType(e.target.value)}
+    <div className="px-4 pt-10 mb-20">
+      {/* Mobile Filter Button */}
+      <div className="lg:hidden flex flex-col gap-3 mb-6">
+        <Title text1="SRI LANKAN" text2="COLLECTIONS" />
+        <div className="flex gap-2">
+          <button
+            onClick={() => setFilterOpen(true)}
+            className="flex-1 flex justify-center items-center gap-2 bg-black text-white px-4 py-3 rounded-md shadow-md hover:bg-gray-900 transition"
           >
-            <option value="relavent">Sort by : Relavent</option>
-            <option value="low-high">Sort by : Low to High</option>
-            <option value="high-low">Sort by : High to Low</option>
-          </select>
-        </div>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 gap-y-6">
-          {filterProducts.map((item, index) => {
-            return (
-              <ProductItem
-                key={index}
-                id={item._id}
-                name={item.name}
-                image={item.image}
-                price={item.price}
-              />
-            );
-          })}
+            Filters
+            <img src={Assets.dropdown_icon} alt="filter" className="h-4" />
+          </button>
+          {(category.length > 0 || subCategory.length > 0) && (
+            <button
+              onClick={clearAllFilters}
+              className="px-4 py-3 border border-gray-300 rounded-md hover:bg-gray-50 transition"
+            >
+              Clear
+            </button>
+          )}
         </div>
       </div>
+
+      <div className="flex gap-6">
+        {/* Desktop Sidebar */}
+        <aside className="hidden lg:block w-72 flex-shrink-0 text-gray-800 rounded-md p-6 space-y-8 shadow-md h-screen sticky top-0 overflow-y-auto bg-white">
+          {/* Clear Filters */}
+          {(category.length > 0 || subCategory.length > 0) && (
+            <div className="flex justify-between items-center">
+              <span className="text-sm text-gray-600">Active filters</span>
+              <button
+                onClick={clearAllFilters}
+                className="text-sm text-blue-600 hover:text-blue-800"
+              >
+                Clear all
+              </button>
+            </div>
+          )}
+
+          <FilterPanel
+            category={category}
+            toggleCategory={toggleCategory}
+            subCategory={subCategory}
+            toggleSubCategory={toggleSubCategory}
+            categories={categories}
+            subCategories={subCategories}
+          />
+        </aside>
+
+        {/* Products Section */}
+        <main className="flex-1">
+          {/* Desktop Header */}
+          <div className="hidden lg:flex justify-between items-center mb-8">
+            <Title text1="OUR" text2="COLLECTIONS" />
+            <div className="flex items-center gap-4">
+              <span className="text-lg text-gray-600">
+                {filterProducts.length} products
+              </span>
+              {/* <select
+                className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-800"
+                value={sortType}
+                onChange={(e) => setSortType(e.target.value)}
+              >
+                <option value="relavent">Sort by: Relevant</option>
+                <option value="low-high">Sort by: Price Low to High</option>
+                <option value="high-low">Sort by: Price High to Low</option>
+                <option value="newest">Sort by: Newest First</option>
+              </select> */}
+            </div>
+          </div>
+
+          {/* Mobile Sort */}
+          {/* <div className="lg:hidden flex justify-between items-center mb-6">
+            <span className="text-sm text-gray-600">
+              {filterProducts.length} products
+            </span>
+            <select
+              className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800"
+              value={sortType}
+              onChange={(e) => setSortType(e.target.value)}
+            >
+              <option value="relavent">Sort by: Relevant</option>
+              <option value="low-high">Sort by: Price Low to High</option>
+              <option value="high-low">Sort by: Price High to Low</option>
+              <option value="newest">Sort by: Newest First</option>
+            </select>
+          </div> */}
+
+          {/* Active Filters */}
+          {(category.length > 0 || subCategory.length > 0) && (
+            <div className="flex flex-wrap gap-2 mb-6">
+              {category.map((cat) => (
+                <span
+                  key={cat}
+                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+                >
+                  {cat}
+                  <button
+                    onClick={() =>
+                      setCategory(category.filter((c) => c !== cat))
+                    }
+                    className="hover:text-blue-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+              {subCategory.map((sub) => (
+                <span
+                  key={sub}
+                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-1"
+                >
+                  {sub}
+                  <button
+                    onClick={() =>
+                      setSubCategory(subCategory.filter((s) => s !== sub))
+                    }
+                    className="hover:text-green-600"
+                  >
+                    ×
+                  </button>
+                </span>
+              ))}
+            </div>
+          )}
+
+          {/* Products Grid */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
+            {filterProducts.length > 0 ? (
+              filterProducts.map((item, idx) => (
+                <ProductItem
+                  key={idx}
+                  id={item._id}
+                  name={item.name}
+                  image={item.image}
+                  priceObj={item.priceObj || item.price}
+                  sizes={item.sizes}
+                />
+              ))
+            ) : (
+              <div className="col-span-full text-center py-12">
+                <p className="text-gray-500 text-lg mb-4">
+                  No products found matching your criteria
+                </p>
+                <button
+                  onClick={clearAllFilters}
+                  className="bg-gray-800 text-white px-6 py-2 rounded-md hover:bg-gray-900 transition"
+                >
+                  Clear Filters
+                </button>
+              </div>
+            )}
+          </div>
+        </main>
+      </div>
+
+      {/* Mobile Filter Modal */}
+      {filterOpen && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-end">
+          <div className="w-80 bg-white h-full p-6 overflow-y-auto shadow-lg relative animate-slideInRight text-gray-800">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-semibold">Filters</h3>
+              <button
+                className="text-gray-500 hover:text-gray-700 text-xl"
+                onClick={() => setFilterOpen(false)}
+              >
+                ✕
+              </button>
+            </div>
+
+            <FilterPanel
+              category={category}
+              toggleCategory={toggleCategory}
+              subCategory={subCategory}
+              toggleSubCategory={toggleSubCategory}
+              categories={categories}
+              subCategories={subCategories}
+            />
+
+            <div className="flex gap-3 mt-8">
+              <button
+                onClick={clearAllFilters}
+                className="flex-1 border border-gray-300 text-gray-700 py-3 rounded-md hover:bg-gray-50 transition"
+              >
+                Clear All
+              </button>
+              <button
+                onClick={() => setFilterOpen(false)}
+                className="flex-1 bg-gray-700 text-white py-3 rounded-md shadow-md hover:bg-gray-800 transition"
+              >
+                Apply Filters
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
+
+// Enhanced Filter Panel
+const FilterPanel = ({
+  category,
+  toggleCategory,
+  subCategory,
+  toggleSubCategory,
+  categories,
+  subCategories,
+}) => (
+  <div className="space-y-8">
+    {/* Main Categories */}
+    <div>
+      <p className="font-semibold mb-4 text-gray-800 text-lg">Categories</p>
+      <div className="grid grid-cols-2 gap-3">
+        {categories.map((cat) => (
+          <label
+            key={cat}
+            className="flex items-center gap-3 cursor-pointer p-2 rounded-lg hover:bg-gray-50 transition-colors border border-gray-200"
+          >
+            <input
+              type="checkbox"
+              value={cat}
+              checked={category.includes(cat)}
+              onChange={toggleCategory}
+              className="w-4 h-4 accent-black"
+            />
+            <span className="text-sm font-medium">{cat}</span>
+          </label>
+        ))}
+      </div>
+    </div>
+
+    {/* Sub Categories */}
+    <div>
+      <p className="font-semibold mb-4 text-gray-800 text-lg">Product Types</p>
+      <div className="space-y-4">
+        {Object.entries(subCategories).map(([mainCat, subs]) => (
+          <div key={mainCat} className="border-l-2 border-gray-200 pl-4">
+            <p className="font-medium text-sm text-gray-600 mb-2">{mainCat}</p>
+            <div className="flex flex-wrap gap-2">
+              {subs.map((sub) => (
+                <label
+                  key={sub}
+                  className="flex items-center gap-2 cursor-pointer px-3 py-1 rounded-full border border-gray-300 hover:border-gray-500 transition-colors"
+                >
+                  <input
+                    type="checkbox"
+                    value={sub}
+                    checked={subCategory.includes(sub)}
+                    onChange={toggleSubCategory}
+                    className="w-3 h-3 accent-gray-600"
+                  />
+                  <span className="text-xs">{sub}</span>
+                </label>
+              ))}
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  </div>
+);
 
 export default Collection;

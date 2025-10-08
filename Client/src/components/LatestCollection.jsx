@@ -5,39 +5,37 @@ import ProductItem from "./ProductItem";
 
 const LatestCollection = () => {
   const { Products } = useContext(ShopContext);
-  console.log(Products);
-
   const [latestProducts, setLatestProducts] = useState([]);
 
   useEffect(() => {
-    setLatestProducts(Products.slice(0, 10));
+    setLatestProducts(Products.slice(0, 8));
   }, [Products]);
 
   return (
-    <div className="my-10">
-      <div className="text-center py-8 text-3xl">
+    <section className="my-10 px-4 sm:px-6 lg:px-10 mt-14">
+      {/* Section Title */}
+      <div className="text-center py-8">
         <Title text1={"LATESTS"} text2={"COLLECTIONS"} />
-        <p className="w-3/4 text-xs m-auto sm:text-sm md:text-base text-gray-600">
-          Lorem ipsum dolor sit amet commodi accusantium fugiat eligendi.
+        <p className="max-w-xl mx-auto mt-2 text-xs sm:text-sm md:text-base text-gray-600">
+          Discover our newest arrivals. Carefully curated fashion products for
+          every style.
         </p>
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
-        {latestProducts.map(
-          (
-            item,
-            index // Map over latestProducts instead of Products
-          ) => (
-            <ProductItem
-              key={index}
-              id={item._id}
-              name={item.name}
-              image={item.image}
-              price={item.price}
-            />
-          )
-        )}
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-5 md:gap-6">
+        {latestProducts.map((item, index) => (
+          <ProductItem
+            key={index}
+            id={item._id}
+            name={item.name}
+            image={item.image}
+            priceObj={item.price} // send full object
+            sizes={item.sizes} // send available sizes
+          />
+        ))}
       </div>
-    </div>
+    </section>
   );
 };
 

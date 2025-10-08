@@ -1,42 +1,49 @@
 import React from "react";
 import { Assets } from "../assets/assets";
+
+const policiesData = [
+  {
+    icon: Assets.exchange_icon,
+    title: "Easy Exchange Policy",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+  },
+  {
+    icon: Assets.quality_icon,
+    title: "7 Days Return Policy",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+  },
+  {
+    icon: Assets.support_img,
+    title: "Good Customer Support",
+    description: "Lorem ipsum dolor, sit amet consectetur adipisicing elit.",
+  },
+  // Add more policies here if needed
+];
+
 const OurPollicies = () => {
   return (
-    <div className="flex flex-col sm:flex-row justify-around gap-12 sm:gap-2 text-center py-20 text-xs sm:text-sm md:text-base text-gray-700">
-      <div>
-        <img
-          src={Assets.exchange_icon}
-          alt="exchange_icon"
-          className="w-12 m-auto mb-5"
-        />
-        <p className="font-semibold">Easy Exchange Policy</p>
-        <p className="text-gray-400">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-        </p>
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-20 bg-white">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-8 sm:gap-10 text-center">
+        {policiesData.map((policy, index) => (
+          <div
+            key={index}
+            className="flex flex-col items-center max-w-xs mx-auto p-4 rounded-md"
+          >
+            <img
+              src={policy.icon}
+              alt={policy.title}
+              className="w-12 sm:w-14 mb-4 sm:mb-5"
+            />
+            <p className="font-semibold text-sm sm:text-base md:text-lg">
+              {policy.title}
+            </p>
+            <p className="text-gray-400 text-xs sm:text-sm md:text-base mt-1">
+              {policy.description}
+            </p>
+          </div>
+        ))}
       </div>
-      <div>
-        <img
-          src={Assets.quality_icon}
-          alt="quality_icon"
-          className="w-12 m-auto mb-5"
-        />
-        <p className="font-semibold">7 Days Return Policy</p>
-        <p className="text-gray-400">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-      <div>
-        <img
-          src={Assets.support_img}
-          alt="support_img"
-          className="w-12 m-auto mb-5"
-        />
-        <p className="font-semibold">Good Customer Support</p>
-        <p className="text-gray-400">
-          Lorem ipsum dolor, sit amet consectetur adipisicing elit.
-        </p>
-      </div>
-    </div>
+    </section>
   );
 };
 

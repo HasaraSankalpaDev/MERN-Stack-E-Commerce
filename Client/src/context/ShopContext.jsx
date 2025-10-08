@@ -12,14 +12,18 @@ const ShopContextProvider = ({ children }) => {
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
-  const Navigate = useNavigate();
+  const navigate = useNavigate();
 
-  const addToCart = async (itemId, size) => {
-    let cartData = structuredClone(cartItems);
-
-    if (!size) {
+  const addToCart = (itemId, size, price) => {
+    if (
+      !size &&
+      Products.find((item) => item._id === itemId)?.sizes?.length > 0
+    ) {
       toast.error("Select Item Size");
+      return;
     }
+
+    let cartData = structuredClone(cartItems);
 
     if (cartData[itemId]) {
       if (cartData[itemId][size]) {
@@ -33,36 +37,37 @@ const ShopContextProvider = ({ children }) => {
     }
 
     setCartItems(cartData);
+    toast.success("Added to Cart");
   };
 
-  const getToatal = () => {
-    let total = 0;
-    for (let item in cartItems) {
-      for (let size in cartItems[item]) {
-        total += cartItems[item][size];
-      }
-    }
-    return total;
-  };
-
-  const updateQuantity = async (itemId, size, quantity) => {
+  const updateQuantity = (itemId, size, quantity) => {
     let cartData = structuredClone(cartItems);
-
-    cartData[itemId][size] = quantity;
-
-    setCartItems(cartData);
+    if (cartData[itemId]) {
+      cartData[itemId][size] = quantity;
+      setCartItems(cartData);
+    }
   };
 
   const getCartAmount = () => {
     let total = 0;
 
-    for (const items in cartItems) {
-      const itemInfo = Products.find((product) => product._id === items);
+    for (const itemId in cartItems) {
+      const itemInfo = Products.find((product) => product._id === itemId);
 
       if (itemInfo) {
-        for (const item in cartItems[items]) {
-          if (cartItems[items][item] > 0) {
-            total += itemInfo.price * cartItems[items][item];
+        for (const size in cartItems[itemId]) {
+          if (cartItems[itemId][size] > 0) {
+            // Handle both priceObj and price formats
+            let price = 0;
+            if (itemInfo.priceObj && itemInfo.priceObj[size]) {
+              price = itemInfo.priceObj[size];
+            } else if (itemInfo.price && typeof itemInfo.price === "number") {
+              price = itemInfo.price;
+            } else if (itemInfo.price && itemInfo.price[size]) {
+              price = itemInfo.price[size];
+            }
+
+            total += price * cartItems[itemId][size];
           }
         }
       }
@@ -71,27 +76,41 @@ const ShopContextProvider = ({ children }) => {
     return total;
   };
 
-  useEffect(() => {
-    console.log(cartItems);
-  }, [cartItems]);
-
-  const value = {
-    Products,
-    currency,
-    delivery_fee,
-    search,
-    setSearch,
-    showSearch,
-    setShowSearch,
-    cartItems,
-    addToCart,
-    getToatal,
-    updateQuantity,
-    getCartAmount,
-    Navigate,
+  const getTotalCartItems = () => {
+    let total = 0;
+    for (const itemId in cartItems) {
+      for (const size in cartItems[itemId]) {
+        total += cartItems[itemId][size];
+      }
+    }
+    return total;
   };
 
-  return <ShopContext.Provider value={value}>{children}</ShopContext.Provider>;
+  useEffect(() => {
+    console.log("Cart Items:", cartItems);
+  }, [cartItems]);
+
+  return (
+    <ShopContext.Provider
+      value={{
+        Products,
+        currency,
+        delivery_fee,
+        search,
+        setSearch,
+        showSearch,
+        setShowSearch,
+        cartItems,
+        addToCart,
+        getTotal: getTotalCartItems, // Returns total number of items in cart
+        getCartAmount, // Returns total monetary amount
+        updateQuantity,
+        navigate,
+      }}
+    >
+      {children}
+    </ShopContext.Provider>
+  );
 };
 
 export default ShopContextProvider;

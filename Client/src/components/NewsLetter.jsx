@@ -2,29 +2,32 @@ import React from "react";
 
 const NewsLetter = () => {
   return (
-    <div className="text-center my-10">
-      <p className="text-2xl font-medium text-gray-800">
-        Subscribe Now & Get 20% Discount
-      </p>
-      <p className="text-gray-400 mt-3 text-lg">
-        Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolore
-        voluptatum enim veritatis magni nobis.
-      </p>
-      <form className="w-full sm:w-1/2 flex items-center mx-auto my-6 pl-3 border">
-        <input
-          type="email"
-          placeholder="Enter Email Address"
-          className="w-full sm:flex-1 outline-none"
-          required
-        />
-        <button
-          type="submit"
-          className="bg-black text-white py-4 px-10 text-xs "
-        >
-          SUBSCRIBE
-        </button>
-      </form>
-    </div>
+    <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-20 bg-white">
+      <div className="text-center max-w-2xl mx-auto">
+        <h2 className="text-2xl sm:text-3xl font-medium text-gray-800">
+          Subscribe Now & Get 20% Discount
+        </h2>
+        <p className="text-gray-400 mt-3 text-sm sm:text-base">
+          Lorem ipsum dolor sit amet consectetur, adipisicing elit. Dolore
+          voluptatum enim veritatis magni nobis.
+        </p>
+
+        <form className="mt-6 flex flex-col sm:flex-row items-center w-full sm:w-3/4 mx-auto border rounded-md overflow-hidden">
+          <input
+            type="email"
+            placeholder="Enter Email Address"
+            className="w-full sm:flex-1 px-4 py-3 text-gray-700 outline-none"
+            required
+          />
+          <button
+            type="submit"
+            className="mt-3 sm:mt-0 sm:ml-2 px-6 py-3 bg-black text-white text-sm sm:text-base font-medium"
+          >
+            SUBSCRIBE
+          </button>
+        </form>
+      </div>
+    </section>
   );
 };
 

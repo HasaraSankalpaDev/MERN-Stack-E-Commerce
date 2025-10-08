@@ -23,14 +23,15 @@ const RelatedProducts = ({ category, subCategory }) => {
       <div className="text-3xl text-center py-2">
         <Title text1={"RELATED"} text2={"PRODUCTS"} />
       </div>
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6 my-10">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 gap-4 gap-y-6 my-10">
         {relatedProducts.map((item, index) => (
           <ProductItem
             key={index}
             id={item._id}
             name={item.name}
             image={item.image}
-            price={item.price}
+            priceObj={item.price} // ✅ fixed prop
+            sizes={item.sizes}
           />
         ))}
       </div>

@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import { ShopContext } from "../context/ShopContext";
 import Title from "./Title";
-import ProductItem from "./ProductItem"; // Make sure this is imported
+import ProductItem from "./ProductItem";
 
 const BestSeller = () => {
   const { Products } = useContext(ShopContext);
@@ -10,39 +10,40 @@ const BestSeller = () => {
   useEffect(() => {
     if (Products && Array.isArray(Products)) {
       const bestProducts = Products.filter((item) => item.bestseller);
-      setBestSellers(bestProducts.slice(0, 5));
+      setBestSellers(bestProducts.slice(0, 8));
     }
   }, [Products]);
 
   return (
-    <div>
-      <div className="my-10">
-        <div className="text-3xl text-center py-8">
-          <Title text1={"BEST"} text2={"SELLERS"} />
-          <p className="w-3/4 text-xs m-auto sm:text-sm md:text-base text-gray-600">
-            Lorem ipsum dolor sit amet consectetur adipisicing elit. Reiciendis
-            dolorum ipsum eius.
-          </p>
-        </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 gap-y-6">
-          {bestSellers.length > 0 ? (
-            bestSellers.map((item) => (
-              <ProductItem
-                key={item._id}
-                id={item._id}
-                name={item.name}
-                image={item.image}
-                price={item.price}
-              />
-            ))
-          ) : (
-            <p className="text-center col-span-full text-gray-500">
-              No bestsellers available.
-            </p>
-          )}
-        </div>
+    <section className="my-10 px-4 sm:px-6 lg:px-10 mt-14">
+      {/* Section Title */}
+      <div className="text-center py-8">
+        <Title text1={"BEST"} text2={"SELLERS"} />
+        <p className="max-w-xl mx-auto mt-2 text-xs sm:text-sm md:text-base text-gray-600">
+          Discover our most popular fashion items loved by our customers.
+        </p>
       </div>
-    </div>
+
+      {/* Products Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-4 gap-4 sm:gap-5 md:gap-5">
+        {bestSellers.length > 0 ? (
+          bestSellers.map((item) => (
+            <ProductItem
+              key={item._id}
+              id={item._id}
+              name={item.name}
+              image={item.image}
+              priceObj={item.price} // ✅ fixed prop
+              sizes={item.sizes}
+            />
+          ))
+        ) : (
+          <p className="text-center col-span-full text-gray-500">
+            No bestsellers available.
+          </p>
+        )}
+      </div>
+    </section>
   );
 };
 
