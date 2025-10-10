@@ -9,6 +9,11 @@ const Nav = () => {
 
   const navItems = ["HOME", "COLLECTION", "ABOUT", "CONTACT"];
 
+  const handleSearchClick = () => {
+    setShowSearch(true); // Show the search bar
+    navigate("/collection"); // Go to collection page
+  };
+
   return (
     <div className="flex items-center justify-between shadow-bottom shadow-lg py-4 px-5 sm:px-10 bg-white border-b-2 relative">
       {/* Logo */}
@@ -42,9 +47,8 @@ const Nav = () => {
           src={Assets.search_icon}
           alt="search_icon"
           className="w-5 cursor-pointer"
-          onClick={() => setShowSearch(true)}
+          onClick={handleSearchClick}
         />
-
         {/* Profile */}
         {/* <div className="relative group">
           <Link to="/login">
@@ -64,7 +68,7 @@ const Nav = () => {
         </div> */}
 
         {/* Cart */}
-        {/* <Link to="/cart" className="relative">
+        <Link to="/cart" className="relative">
           <img
             src={Assets.cart_icon}
             alt="cart_icon"
@@ -73,7 +77,7 @@ const Nav = () => {
           <span className="absolute -right-2 -bottom-2 text-[10px] w-4 h-4 flex items-center justify-center bg-black text-white rounded-full">
             {getTotal()}
           </span>
-        </Link> */}
+        </Link>
 
         {/* Mobile Menu Icon */}
         <img

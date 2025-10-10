@@ -1,34 +1,39 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import "swiper/css";
 import "swiper/css/pagination";
 import { Pagination, Autoplay } from "swiper";
-import { Assets } from "../assets/assets";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Hero = () => {
+  useEffect(() => {
+    AOS.init({ duration: 1000, once: true });
+  }, []);
+
   const slides = [
     {
       title: "Spring Collection 2025",
       subtitle: "NEW ARRIVALS",
       cta: "SHOP NOW",
-      img: "https://images.unsplash.com/photo-1617114919297-3c8ddb01f599?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8NHx8bWVucyUyMGZhc2hpb258ZW58MHx8MHx8fDA%3D",
+      img: "./slider-img-01.png",
     },
     {
       title: "Exclusive Designer Wear",
       subtitle: "TRENDING",
       cta: "VIEW COLLECTION",
-      img: "https://images.unsplash.com/photo-1617137968427-85924c800a22?w=400&auto=format&fit=crop&q=60&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8bWVucyUyMGZhc2hpb258ZW58MHx8MHx8fDA%3D",
+      img: "./slider-img-02.png",
     },
     {
       title: "Elegant Evening Dresses",
       subtitle: "LIMITED EDITION",
       cta: "SHOP NOW",
-      img: "http://localhost:5173/src/assets/p_img2_1.png",
+      img: "./slider-img-03.png",
     },
   ];
 
   return (
-    <div className="w-full -mt-6">
+    <div className="w-full relative">
       <Swiper
         modules={[Pagination, Autoplay]}
         pagination={{ clickable: true }}
@@ -40,7 +45,10 @@ const Hero = () => {
           <SwiperSlide key={index}>
             <div className="flex flex-col-reverse sm:flex-row items-center justify-between w-full h-full bg-white px-4 sm:px-10 relative">
               {/* Left Text */}
-              <div className="w-full sm:w-1/2 flex flex-col justify-center items-start py-6 sm:py-20 text-[#414141]">
+              <div
+                className="w-full sm:w-1/2 flex flex-col justify-center items-start py-6 sm:py-20 text-[#414141]"
+                data-aos="fade-right"
+              >
                 <div className="flex items-center gap-2 mb-2">
                   <div className="w-12 md:w-16 h-[2px] bg-[#414141]"></div>
                   <p className="font-medium text-sm md:text-base uppercase">
@@ -56,26 +64,30 @@ const Hero = () => {
               </div>
 
               {/* Right Image */}
-              <div className="w-full sm:w-1/2 flex justify-center items-center px-0 sm:px-10">
+              <div
+                className="w-full sm:w-1/2 flex justify-center items-center px-0 sm:px-10"
+                data-aos="fade-left"
+              >
                 <img
                   src={slide.img}
                   alt={slide.title}
-                  className="w-full sm:w-full object-cover rounded-lg shadow-lg max-h-[400px] sm:max-h-[500px] md:max-h-[400px]"
+                  className="w-full sm:w-full object-cover rounded-lg shadow-lg"
                 />
               </div>
-
-              {/* Pagination bullets spacing for mobile */}
-              <style jsx>{`
-                @media (max-width: 640px) {
-                  .swiper-pagination {
-                    margin-top: 1rem !important; /* adds spacing from content */
-                  }
-                }
-              `}</style>
             </div>
           </SwiperSlide>
         ))}
       </Swiper>
+
+      {/* Add spacing for pagination */}
+      <style jsx global>{`
+        /* Mobile: add spacing between slides and pagination */
+        @media (max-width: 640px) {
+          .mySwiper .swiper-pagination {
+            bottom: -2rem !important; /* Moves pagination below the slide content */
+          }
+        }
+      `}</style>
     </div>
   );
 };

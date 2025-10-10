@@ -3,6 +3,8 @@ import { ShopContext } from "../context/ShopContext";
 import { Assets } from "../assets/assets";
 import Title from "../components/Title";
 import ProductItem from "../components/ProductItem";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const Collection = () => {
   const { Products, search, showSearch } = useContext(ShopContext);
@@ -12,7 +14,6 @@ const Collection = () => {
   const [subCategory, setSubCategory] = useState([]);
   const [sortType, setSortType] = useState("relavent");
 
-  // Sri Lankan inspired categories and subcategories
   const categories = [
     "Men",
     "Women",
@@ -45,6 +46,10 @@ const Collection = () => {
     ],
   };
 
+  useEffect(() => {
+    AOS.init({ duration: 700, once: true });
+  }, []);
+
   const toggleCategory = (e) => {
     const value = e.target.value;
     setCategory((prev) =>
@@ -59,10 +64,8 @@ const Collection = () => {
     );
   };
 
-  // Helper function to get product price
   const getProductPrice = (product) => {
     if (product.priceObj && typeof product.priceObj === "object") {
-      // Get the first available price from priceObj
       const prices = Object.values(product.priceObj).filter(
         (price) => typeof price === "number"
       );
@@ -72,56 +75,40 @@ const Collection = () => {
   };
 
   const applyFilter = () => {
-    let productsCopy = [...Products]; // Use spread operator instead of slice()
-
+    let productsCopy = [...Products];
     if (search && showSearch) {
       productsCopy = productsCopy.filter((item) =>
         item.name.toLowerCase().includes(search.toLowerCase())
       );
     }
-
     if (category.length > 0) {
       productsCopy = productsCopy.filter((item) =>
         category.includes(item.category)
       );
     }
-
     if (subCategory.length > 0) {
       productsCopy = productsCopy.filter((item) =>
         subCategory.includes(item.subCategory)
       );
     }
-
     setFilterProducts(productsCopy);
   };
 
   const sortProducts = () => {
     let fpCopy = [...filterProducts];
-
     switch (sortType) {
       case "low-high":
-        fpCopy.sort((a, b) => {
-          const priceA = getProductPrice(a);
-          const priceB = getProductPrice(b);
-          return priceA - priceB;
-        });
+        fpCopy.sort((a, b) => getProductPrice(a) - getProductPrice(b));
         break;
       case "high-low":
-        fpCopy.sort((a, b) => {
-          const priceA = getProductPrice(a);
-          const priceB = getProductPrice(b);
-          return priceB - priceA;
-        });
+        fpCopy.sort((a, b) => getProductPrice(b) - getProductPrice(a));
         break;
       case "newest":
-        // Assuming products have a date field, sort by newest first
         fpCopy.sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
         break;
       default:
-        // For "relavent", maintain the original order
         break;
     }
-
     setFilterProducts(fpCopy);
   };
 
@@ -131,27 +118,19 @@ const Collection = () => {
     setSortType("relavent");
   };
 
-  // Apply filters when category, subCategory, search changes
   useEffect(() => {
     applyFilter();
   }, [category, subCategory, search, showSearch, Products]);
-
-  // Sort products when sortType changes
   useEffect(() => {
-    if (filterProducts.length > 0) {
-      sortProducts();
-    }
+    if (filterProducts.length > 0) sortProducts();
   }, [sortType]);
-
-  // Initialize with all products
   useEffect(() => {
     setFilterProducts(Products);
   }, [Products]);
 
   return (
     <div className="px-4 pt-10 mb-20">
-      {/* Mobile Filter Button */}
-      <div className="lg:hidden flex flex-col gap-3 mb-6">
+      <div className="lg:hidden flex flex-col gap-3 mb-6" data-aos="fade-up">
         <Title text1="SRI LANKAN" text2="COLLECTIONS" />
         <div className="flex gap-2">
           <button
@@ -173,9 +152,10 @@ const Collection = () => {
       </div>
 
       <div className="flex gap-6">
-        {/* Desktop Sidebar */}
-        <aside className="hidden lg:block w-72 flex-shrink-0 text-gray-800 rounded-md p-6 space-y-8 shadow-md h-screen sticky top-0 overflow-y-auto bg-white">
-          {/* Clear Filters */}
+        <aside
+          className="hidden lg:block w-72 flex-shrink-0 text-gray-800 rounded-md p-6 space-y-8 shadow-md h-screen sticky top-0 overflow-y-auto bg-white"
+          data-aos="fade-right"
+        >
           {(category.length > 0 || subCategory.length > 0) && (
             <div className="flex justify-between items-center">
               <span className="text-sm text-gray-600">Active filters</span>
@@ -187,7 +167,6 @@ const Collection = () => {
               </button>
             </div>
           )}
-
           <FilterPanel
             category={category}
             toggleCategory={toggleCategory}
@@ -198,98 +177,29 @@ const Collection = () => {
           />
         </aside>
 
-        {/* Products Section */}
         <main className="flex-1">
-          {/* Desktop Header */}
-          <div className="hidden lg:flex justify-between items-center mb-8">
-            <Title text1="OUR" text2="COLLECTIONS" />
-            <div className="flex items-center gap-4">
-              <span className="text-lg text-gray-600">
-                {filterProducts.length} products
-              </span>
-              {/* <select
-                className="border border-gray-300 rounded-md px-4 py-2 text-sm text-gray-800"
-                value={sortType}
-                onChange={(e) => setSortType(e.target.value)}
-              >
-                <option value="relavent">Sort by: Relevant</option>
-                <option value="low-high">Sort by: Price Low to High</option>
-                <option value="high-low">Sort by: Price High to Low</option>
-                <option value="newest">Sort by: Newest First</option>
-              </select> */}
-            </div>
-          </div>
-
-          {/* Mobile Sort */}
-          {/* <div className="lg:hidden flex justify-between items-center mb-6">
-            <span className="text-sm text-gray-600">
-              {filterProducts.length} products
-            </span>
-            <select
-              className="border border-gray-300 rounded-md px-3 py-2 text-sm text-gray-800"
-              value={sortType}
-              onChange={(e) => setSortType(e.target.value)}
-            >
-              <option value="relavent">Sort by: Relevant</option>
-              <option value="low-high">Sort by: Price Low to High</option>
-              <option value="high-low">Sort by: Price High to Low</option>
-              <option value="newest">Sort by: Newest First</option>
-            </select>
-          </div> */}
-
-          {/* Active Filters */}
-          {(category.length > 0 || subCategory.length > 0) && (
-            <div className="flex flex-wrap gap-2 mb-6">
-              {category.map((cat) => (
-                <span
-                  key={cat}
-                  className="bg-blue-100 text-blue-800 px-3 py-1 rounded-full text-sm flex items-center gap-1"
-                >
-                  {cat}
-                  <button
-                    onClick={() =>
-                      setCategory(category.filter((c) => c !== cat))
-                    }
-                    className="hover:text-blue-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-              {subCategory.map((sub) => (
-                <span
-                  key={sub}
-                  className="bg-green-100 text-green-800 px-3 py-1 rounded-full text-sm flex items-center gap-1"
-                >
-                  {sub}
-                  <button
-                    onClick={() =>
-                      setSubCategory(subCategory.filter((s) => s !== sub))
-                    }
-                    className="hover:text-green-600"
-                  >
-                    ×
-                  </button>
-                </span>
-              ))}
-            </div>
-          )}
-
-          {/* Products Grid */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 gap-4 sm:gap-6">
             {filterProducts.length > 0 ? (
               filterProducts.map((item, idx) => (
-                <ProductItem
-                  key={idx}
-                  id={item._id}
-                  name={item.name}
-                  image={item.image}
-                  priceObj={item.priceObj || item.price}
-                  sizes={item.sizes}
-                />
+                <div
+                  key={item._id}
+                  data-aos="fade-up"
+                  data-aos-delay={idx * 50}
+                >
+                  <ProductItem
+                    id={item._id}
+                    name={item.name}
+                    image={item.image}
+                    priceObj={item.priceObj || item.price}
+                    sizes={item.sizes}
+                  />
+                </div>
               ))
             ) : (
-              <div className="col-span-full text-center py-12">
+              <div
+                className="col-span-full text-center py-12"
+                data-aos="fade-up"
+              >
                 <p className="text-gray-500 text-lg mb-4">
                   No products found matching your criteria
                 </p>
@@ -305,9 +215,11 @@ const Collection = () => {
         </main>
       </div>
 
-      {/* Mobile Filter Modal */}
       {filterOpen && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-end">
+        <div
+          className="fixed inset-0 z-50 bg-black bg-opacity-70 flex justify-end"
+          data-aos="fade-left"
+        >
           <div className="w-80 bg-white h-full p-6 overflow-y-auto shadow-lg relative animate-slideInRight text-gray-800">
             <div className="flex justify-between items-center mb-6">
               <h3 className="text-lg font-semibold">Filters</h3>
@@ -318,7 +230,6 @@ const Collection = () => {
                 ✕
               </button>
             </div>
-
             <FilterPanel
               category={category}
               toggleCategory={toggleCategory}
@@ -327,7 +238,6 @@ const Collection = () => {
               categories={categories}
               subCategories={subCategories}
             />
-
             <div className="flex gap-3 mt-8">
               <button
                 onClick={clearAllFilters}
@@ -349,7 +259,6 @@ const Collection = () => {
   );
 };
 
-// Enhanced Filter Panel
 const FilterPanel = ({
   category,
   toggleCategory,
@@ -359,7 +268,6 @@ const FilterPanel = ({
   subCategories,
 }) => (
   <div className="space-y-8">
-    {/* Main Categories */}
     <div>
       <p className="font-semibold mb-4 text-gray-800 text-lg">Categories</p>
       <div className="grid grid-cols-2 gap-3">
@@ -380,8 +288,6 @@ const FilterPanel = ({
         ))}
       </div>
     </div>
-
-    {/* Sub Categories */}
     <div>
       <p className="font-semibold mb-4 text-gray-800 text-lg">Product Types</p>
       <div className="space-y-4">

@@ -14,7 +14,8 @@ import Footer from "./components/Footer";
 import SearchBar from "./components/SearchBar";
 import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { Cart } from "./pages/Cart";
+import Cart from "./pages/Cart"; // ✅ correct
+
 import AdminDashboard from "./pages/AdminDashboard";
 const App = () => {
   return (

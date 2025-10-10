@@ -1,58 +1,62 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Assets } from "../assets/assets";
 import Title from "./Title";
+import AOS from "aos";
+import "aos/dist/aos.css";
 
 const categoriesData = [
   {
     id: "men",
     name: "Men's Fashion",
-    image: Assets.men_category, // Replace with your actual image asset
+    image: Assets.men_category,
     description: "Stylish & Comfortable",
     bgGradient: "from-blue-500 to-blue-700",
-    textColor: "text-blue-600",
   },
   {
     id: "women",
     name: "Women's Fashion",
-    image: Assets.women_category, // Replace with your actual image asset
+    image: Assets.women_category,
     description: "Elegant & Trendy",
     bgGradient: "from-pink-500 to-pink-700",
-    textColor: "text-pink-600",
   },
   {
     id: "kids",
     name: "Kids Collection",
-    image: Assets.kids_category, // Replace with your actual image asset
+    image: Assets.kids_category,
     description: "Fun & Colorful",
     bgGradient: "from-green-500 to-green-700",
-    textColor: "text-green-600",
   },
   {
     id: "trend",
     name: "Trending Now",
-    image: Assets.trend_category, // Replace with your actual image asset
+    image: Assets.trend_category,
     description: "Hot & Popular",
     bgGradient: "from-purple-500 to-purple-700",
-    textColor: "text-purple-600",
   },
 ];
 
 const CategoriesSection = () => {
+  useEffect(() => {
+    AOS.init({ duration: 800, once: true });
+  }, []);
+
   return (
     <section className="py-12 sm:py-20 px-4 sm:px-6 lg:px-20 bg-white">
       {/* Section Header */}
-      <div className="text-center mb-12 sm:mb-16">
+      <div className="text-center mb-12 sm:mb-16" data-aos="fade-up">
         <Title text1={"Shop By"} text2={"Category"} />
       </div>
 
       {/* Categories Grid */}
       <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 max-w-6xl mx-auto">
-        {categoriesData.map((category) => (
+        {categoriesData.map((category, index) => (
           <Link
             key={category.id}
-            to={`/collection/${category.id}`}
+            to={`/collection/`}
             className="group relative overflow-hidden rounded-md shadow-md hover:shadow-xl transition-all duration-500"
+            data-aos="fade-up"
+            data-aos-delay={index * 100}
           >
             {/* Image Container */}
             <div className="aspect-square overflow-hidden bg-gray-100">
@@ -94,7 +98,11 @@ const CategoriesSection = () => {
       </div>
 
       {/* View All Button */}
-      <div className="text-center mt-12">
+      <div
+        className="text-center mt-12"
+        data-aos="fade-up"
+        data-aos-delay={400}
+      >
         <Link
           to="/collection"
           className="inline-flex items-center gap-2 bg-gray-800 text-white px-8 py-3 rounded-full hover:bg-gray-900 transition-all duration-300 hover:scale-105"

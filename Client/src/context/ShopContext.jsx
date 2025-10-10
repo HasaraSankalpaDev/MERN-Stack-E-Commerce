@@ -6,19 +6,38 @@ import axios from "axios";
 export const ShopContext = createContext();
 
 const ShopContextProvider = ({ children }) => {
-  const currency = "$";
+  const currency = "Rs.";
   const delivery_fee = 10;
 
-  const [Products, setProducts] = useState([]); // fetched from backend
+  const [Products, setProducts] = useState([]);
   const [search, setSearch] = useState("");
   const [showSearch, setShowSearch] = useState(false);
   const [cartItems, setCartItems] = useState({});
   const navigate = useNavigate();
 
-  // Fetch products from backend API
+  // Load cart from localStorage on initial render
+  useEffect(() => {
+    const savedCartItems = localStorage.getItem("cartItems");
+    if (savedCartItems) {
+      try {
+        setCartItems(JSON.parse(savedCartItems));
+      } catch (error) {
+        console.error("Error parsing saved cart items:", error);
+        localStorage.removeItem("cartItems");
+      }
+    }
+  }, []);
+
+  // Save cart to localStorage whenever cartItems changes
+  useEffect(() => {
+    if (Object.keys(cartItems).length > 0) {
+      localStorage.setItem("cartItems", JSON.stringify(cartItems));
+    }
+  }, [cartItems]);
+
   const fetchProducts = async () => {
     try {
-      const res = await axios.get("http://localhost:5000/api/products"); // replace with your API
+      const res = await axios.get("http://localhost:5000/api/products");
       setProducts(res.data);
     } catch (err) {
       console.log("Error fetching products:", err);
@@ -30,11 +49,16 @@ const ShopContextProvider = ({ children }) => {
     fetchProducts();
   }, []);
 
-  const addToCart = (itemId, size, price) => {
-    const itemInfo = Products.find((item) => item._id === itemId);
-    if (!itemInfo) return;
+  const addToCart = (item, quantity = 1, size = "default") => {
+    const itemId = item._id ? item._id : item;
+    const itemInfo = Products.find((product) => product._id === itemId);
 
-    if (!size && itemInfo.sizes?.length > 0) {
+    if (!itemInfo) {
+      toast.error("Product not found");
+      return;
+    }
+
+    if (itemInfo.sizes?.length > 0 && !size) {
       toast.error("Select Item Size");
       return;
     }
@@ -43,13 +67,13 @@ const ShopContextProvider = ({ children }) => {
 
     if (cartData[itemId]) {
       if (cartData[itemId][size]) {
-        cartData[itemId][size] += 1;
+        cartData[itemId][size] += quantity;
       } else {
-        cartData[itemId][size] = 1;
+        cartData[itemId][size] = quantity;
       }
     } else {
       cartData[itemId] = {};
-      cartData[itemId][size] = 1;
+      cartData[itemId][size] = quantity;
     }
 
     setCartItems(cartData);
@@ -62,6 +86,12 @@ const ShopContextProvider = ({ children }) => {
       cartData[itemId][size] = quantity;
       setCartItems(cartData);
     }
+  };
+
+  // Clear cart function (optional - if you need it)
+  const clearCart = () => {
+    setCartItems({});
+    localStorage.removeItem("cartItems");
   };
 
   const getCartAmount = () => {
@@ -78,6 +108,8 @@ const ShopContextProvider = ({ children }) => {
               price = itemInfo.price;
             } else if (itemInfo.price && itemInfo.price[size]) {
               price = itemInfo.price[size];
+            } else if (itemInfo.priceObj && itemInfo.priceObj[size]) {
+              price = itemInfo.priceObj[size];
             }
             total += price * cartItems[itemId][size];
           }
@@ -86,6 +118,22 @@ const ShopContextProvider = ({ children }) => {
     }
 
     return total;
+  };
+  const removeFromCart = (itemId, size) => {
+    let cartData = structuredClone(cartItems);
+
+    if (cartData[itemId] && cartData[itemId][size]) {
+      delete cartData[itemId][size];
+
+      // If no sizes left for that item, remove item entirely
+      if (Object.keys(cartData[itemId]).length === 0) {
+        delete cartData[itemId];
+      }
+
+      setCartItems(cartData);
+      localStorage.setItem("cartItems", JSON.stringify(cartData));
+      toast.info("Item removed from cart");
+    }
   };
 
   const getTotalCartItems = () => {
@@ -97,10 +145,6 @@ const ShopContextProvider = ({ children }) => {
     }
     return total;
   };
-
-  useEffect(() => {
-    console.log("Cart Items:", cartItems);
-  }, [cartItems]);
 
   return (
     <ShopContext.Provider
@@ -117,8 +161,10 @@ const ShopContextProvider = ({ children }) => {
         getTotal: getTotalCartItems,
         getCartAmount,
         updateQuantity,
+        clearCart,
         navigate,
-        fetchProducts, // expose fetchProducts in case you want to refresh products
+        removeFromCart,
+        fetchProducts,
       }}
     >
       {children}
